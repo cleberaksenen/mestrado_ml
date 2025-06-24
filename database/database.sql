@@ -5,10 +5,10 @@ USE doadores_ml;
 CREATE TABLE paciente (
     paciente_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     redcap_id INTEGER,
+    codigo_aliquota TEXT,
     tipo_paciente TEXT,
     identificador_pesfis INTEGER,
     dt_nascimento DATE,
-    idade_anos INT,
     genero ENUM("MASCULINO", "FEMININO"),
     grupo_abo ENUM("A", "B", "AB", "O", "NAO INFORMADO"),
     antigeno_abo ENUM("Rh+", "Rh-", "NAO INFORMADO"),
@@ -33,7 +33,8 @@ CREATE TABLE paciente (
     fabricante_dose01 ENUM('PFIZER (12 ANOS OU MAIS)', 'ASTRAZENECA', 'CORONAVAC', 'JANSSEN', 'NAO INFORMADO'),
     fabricante_dose02 ENUM('PFIZER (12 ANOS OU MAIS)', 'ASTRAZENECA', 'CORONAVAC', 'JANSSEN', 'NAO INFORMADO'),
     fabricante_dose03 ENUM('PFIZER (12 ANOS OU MAIS)', 'ASTRAZENECA', 'CORONAVAC', 'JANSSEN', 'NAO INFORMADO'),
-    fabricante_dose04 ENUM('PFIZER (12 ANOS OU MAIS)', 'ASTRAZENECA', 'CORONAVAC', 'JANSSEN', 'NAO INFORMADO')
+    fabricante_dose04 ENUM('PFIZER (12 ANOS OU MAIS)', 'ASTRAZENECA', 'CORONAVAC', 'JANSSEN', 'NAO INFORMADO'),
+    idade_anos INT
 );
 
 CREATE TABLE exame (
@@ -86,6 +87,7 @@ SET escolaridade_group = CASE
     ELSE 'NAO INFORMADO'
 END;
 
-UPDATE paciente p
-JOIN exame e ON p.paciente_id = e.paciente_id
-SET p.idade_anos = TIMESTAMPDIFF(YEAR, p.dt_nascimento, e.dt_definitiva_amostra);
+UPDATE exame e
+JOIN paciente p ON e.paciente_id = p.paciente_id
+SET e.idade_anos = TIMESTAMPDIFF(YEAR, p.dt_nascimento, e.dt_definitiva_amostra)
+WHERE p.dt_nascimento IS NOT NULL AND e.dt_definitiva_amostra IS NOT NULL;
